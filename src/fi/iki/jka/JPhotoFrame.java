@@ -104,6 +104,8 @@ public class JPhotoFrame extends JFrame
         // Do nothing... needed for inheritance !
     }
 
+    public int interval;
+
     public JPhotoFrame(String frameName, JPhotoCollection photos) throws Exception {
         init(frameName, photos);
     }
@@ -118,7 +120,7 @@ public class JPhotoFrame extends JFrame
         prefs = Preferences.userRoot().node("/fi/iki/jka/jphotoframe");        
         JPhotoPageInfo.setDefault(prefs.get(PAGEINFO, null));
         photoDirectory = new File(prefs.get(PHOTO_DIR, System.getProperty("user.dir")));
-            
+
         if (photos==null)
             photos = new JPhotoCollection();
         this.photos = photos;
@@ -580,7 +582,18 @@ public class JPhotoFrame extends JFrame
             showExif();
         }
         else if (cmd.equals(JPhotoMenu.A_SLIDESHOW)) {
-            slideShowActions();
+            this.interval = 5000;
+            if (event.getID() != 0) {
+                if (photos.getSize()>0) {
+                    JPhotoShow show = new JPhotoShow(photos, this.interval, list);
+                    show.setVisible(true);
+                }
+                else
+                    JOptionPane.showMessageDialog(this, "No photos to show!",
+                            APP_NAME, JOptionPane.ERROR_MESSAGE);
+            }
+
+                
         }
         else if (cmd.equals(JPhotoMenu.A_HELP)) {
             displayHelp();
@@ -615,19 +628,9 @@ public class JPhotoFrame extends JFrame
         }
         else
             System.out.println("Not implemented: "+cmd);
-        
-        setTitle();
-    }
 
-    public void slideShowActions() {
-        if (photos.getSize()>0) {
-            JPhotoShow show = new JPhotoShow(photos, 5000, list);
-            show.setVisible(true);
-
-        }
-        else
-            JOptionPane.showMessageDialog(this, "No photos to show!",
-                                          APP_NAME, JOptionPane.ERROR_MESSAGE);
+        if (event.getID() != 0)
+            setTitle();
     }
 
     public void insertPhotos(String files[]) {
